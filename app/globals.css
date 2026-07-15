@@ -1,26 +1,271 @@
-@import "tailwindcss";
+@import 'tailwindcss';
+@import 'leaflet/dist/leaflet.css';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --ncc-ink: #141414;
+  --ncc-muted: #5c6570;
+  --solid: #7c4dff;
+  --solid-soft: #ebe6fb;
+  --glass-bg: rgb(255 255 255 / 0.7);
+  --glass-border: rgb(255 255 255 / 0.55);
+  --glass-shadow: 0 8px 32px rgba(20, 28, 40, 0.1);
+  --map-marker-ring: #fff;
+  --you-accent: #c45d26;
+  --background: #e8eaed;
+  --foreground: #141414;
 }
 
 @theme inline {
+  --color-ncc-ink: var(--ncc-ink);
+  --color-ncc-muted: var(--ncc-muted);
+  --color-solid: var(--solid);
+  --color-solid-soft: var(--solid-soft);
+  --color-you: var(--you-accent);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-sans: var(--font-display);
+  --font-display: var(--font-display);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+
+/* Soften map edges so centre stays prominent */
+.map-vignette {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+}
+
+.map-vignette-blur {
+  position: absolute;
+  inset: 0;
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  -webkit-mask-image: radial-gradient(
+    ellipse 72% 68% at 50% 46%,
+    transparent 28%,
+    rgba(0, 0, 0, 0.55) 62%,
+    #000 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 72% 68% at 50% 46%,
+    transparent 28%,
+    rgba(0, 0, 0, 0.55) 62%,
+    #000 100%
+  );
+}
+
+.map-vignette-wash {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    ellipse 78% 72% at 50% 45%,
+    transparent 32%,
+    rgb(232 234 237 / 0.22) 62%,
+    rgb(232 234 237 / 0.68) 100%
+  );
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .map-vignette-blur {
+    -webkit-backdrop-filter: blur(4px);
+    backdrop-filter: blur(4px);
+  }
+}
+
+.leaflet-top.leaflet-right {
+  top: 4.5rem;
+  right: 0.65rem;
+}
+
+.leaflet-bottom.leaflet-right {
+  margin-bottom: 0.25rem;
+}
+
+/* Full-bleed Leaflet */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  font: inherit;
+  background: #dfe3e8;
+  z-index: 0;
+}
+
+.leaflet-control-attribution {
+  background: rgba(255, 255, 255, 0.65) !important;
+  backdrop-filter: blur(6px);
+  font-size: 10px !important;
+  color: var(--ncc-muted) !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 14px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid rgba(20, 28, 40, 0.06);
+  padding: 2px;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+}
+
+.leaflet-popup-content:has(.listing-popup) {
+  margin: 8px;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none;
+}
+
+/* white/70 + blur-xl — keep this element free of transform/filter/opacity anim */
+.glass-panel {
+  /* background-color: rgb(255 255 255 / 0.7); */
+  border: 1px solid rgb(255 255 255 / 0.5);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
+}
+
+.slider-solid {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 5px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--solid) 22%, #e4e0f0);
+  outline: none;
+}
+
+.slider-solid::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--solid);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(60, 40, 120, 0.35);
+}
+
+.slider-solid::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--solid);
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(60, 40, 120, 0.35);
+}
+
+/* Opacity-only: keeping transform on glass kills backdrop-filter */
+@keyframes overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes fade-backdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-overlay-in {
+  animation: overlay-in 0.4s ease both;
+}
+
+.animate-modal-in {
+  animation: modal-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-backdrop {
+  animation: fade-backdrop 0.25s ease both;
+}
+
+.leaflet-div-icon.map-listing-marker {
+  background: transparent;
+  border: none;
+}
+
+.leaflet-div-icon.map-listing-marker svg {
+  display: block;
+  max-width: 11px;
+  max-height: 11px;
+  overflow: visible;
+}
+
+/* Glass-styled Leaflet zoom controls */
+.leaflet-control-zoom {
+  border: none !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  overflow: visible !important;
+}
+
+.leaflet-bar {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.leaflet-control-zoom a.leaflet-control-zoom-in,
+.leaflet-control-zoom a.leaflet-control-zoom-out {
+  width: 36px !important;
+  height: 36px !important;
+  line-height: 34px !important;
+  margin-bottom: 8px !important;
+  border: 1px solid rgba(255, 255, 255, 0.55) !important;
+  border-radius: 12px !important;
+  background: rgba(255, 255, 255, 0.42) !important;
+  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(16px);
+  color: var(--ncc-ink) !important;
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  box-shadow: 0 8px 24px rgba(20, 28, 40, 0.1);
+  text-indent: 0 !important;
+}
+
+.leaflet-control-zoom a.leaflet-control-zoom-out {
+  margin-bottom: 0 !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: rgba(255, 255, 255, 0.62) !important;
+  color: var(--ncc-ink) !important;
+}
+
+.leaflet-control-zoom a.leaflet-disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-overlay-in,
+  .animate-modal-in,
+  .animate-fade-backdrop {
+    animation: none;
+  }
 }
