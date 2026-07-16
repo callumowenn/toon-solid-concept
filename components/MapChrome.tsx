@@ -13,6 +13,7 @@ import {
 import { CATEGORY_FA_ICON } from '@/lib/categoryIcons';
 import { SOLID_CATEGORY_ICONS } from '@/lib/solidDataIcons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCalendarPlus } from '@fortawesome/free-solid-svg-icons';
 import { ClockIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 
@@ -20,6 +21,7 @@ type Props = {
   solidConnected: boolean;
   solidShare: SolidShareResult | null;
   onConnectClick: () => void;
+  onCreateEventClick?: () => void;
   filters: ActivityFilterState;
   onFiltersChange: (next: ActivityFilterState) => void;
 };
@@ -28,6 +30,7 @@ export default function MapChrome({
   solidConnected,
   solidShare,
   onConnectClick,
+  onCreateEventClick,
   filters,
   onFiltersChange,
 }: Props) {
@@ -80,64 +83,77 @@ export default function MapChrome({
           </div>
 
           {solidConnected ? (
-            <GlassPanel
-              as="button"
-              type="button"
-              onClick={onConnectClick}
-              className="pointer-events-auto flex h-[42px] shrink-0 cursor-pointer items-center gap-2 rounded-xl px-2.5 text-left transition hover:bg-white/50"
-              aria-label="Manage Solid data sharing"
-            >
-              <div className="relative shrink-0">
-                <span
-                  className="flex size-7 items-center justify-center rounded-full bg-solid-soft text-xs font-bold text-solid"
-                  aria-hidden
-                >
-                  {mockPodProfile.displayName.slice(0, 1)}
-                </span>
-                <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full border border-white bg-solid shadow-sm">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src="/solid-emblem.svg"
-                    alt=""
-                    width={10}
-                    height={9}
-                    className="h-2 w-auto"
-                    aria-hidden
-                  />
-                </span>
-              </div>
-
-              <span className="truncate text-sm font-bold text-ncc-ink">
-                {mockPodProfile.displayName}
-              </span>
-
-              {sharedCategories.length > 0 ? (
-                <span className="flex items-center gap-0.5" aria-hidden>
-                  {sharedCategories.map((id) => {
-                    const entry = SOLID_CATEGORY_ICONS[id];
-                    if (!entry) return null;
-                    const Icon = entry.icon;
-                    return (
-                      <span
-                        key={id}
-                        title={entry.label}
-                        className="flex size-5 items-center justify-center rounded-md bg-solid-soft text-solid"
-                      >
-                        <Icon className="size-3" aria-hidden />
-                      </span>
-                    );
-                  })}
-                </span>
-              ) : null}
-
-              <span
-                className="flex max-w-28 items-center gap-1 truncate text-[10px] font-semibold text-ncc-muted sm:max-w-none"
-                title={`Access: ${retentionLabel}`}
+            <div className="pointer-events-auto flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={onCreateEventClick}
+                className="flex h-[42px] cursor-pointer items-center gap-2 rounded-xl border border-ncc-ink/10 bg-white/50 px-3.5 text-sm font-bold text-ncc-ink/70 shadow-sm backdrop-blur-lg transition hover:bg-white/80"
               >
-                <ClockIcon className="size-3 shrink-0" aria-hidden />
-                <span className="truncate">{retentionLabel}</span>
-              </span>
-            </GlassPanel>
+                <FontAwesomeIcon
+                  icon={faCalendarPlus}
+                  className="size-3.5 text-ncc-ink/70"
+                />
+                Create Event
+              </button>
+              <GlassPanel
+                as="button"
+                type="button"
+                onClick={onConnectClick}
+                className="flex h-[42px] shrink-0 cursor-pointer items-center gap-2 rounded-xl px-2.5 text-left transition hover:bg-white/50"
+                aria-label="Manage Solid data sharing"
+              >
+                <div className="relative shrink-0">
+                  <span
+                    className="flex size-7 items-center justify-center rounded-full bg-solid-soft text-xs font-bold text-solid"
+                    aria-hidden
+                  >
+                    {mockPodProfile.displayName.slice(0, 1)}
+                  </span>
+                  <span className="absolute -bottom-0.5 -right-0.5 flex size-3.5 items-center justify-center rounded-full border border-white bg-solid shadow-sm">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src="/solid-emblem.svg"
+                      alt=""
+                      width={10}
+                      height={9}
+                      className="h-2 w-auto"
+                      aria-hidden
+                    />
+                  </span>
+                </div>
+
+                <span className="truncate text-sm font-bold text-ncc-ink">
+                  {mockPodProfile.displayName}
+                </span>
+
+                {sharedCategories.length > 0 ? (
+                  <span className="flex items-center gap-0.5" aria-hidden>
+                    {sharedCategories.map((id) => {
+                      const entry = SOLID_CATEGORY_ICONS[id];
+                      if (!entry) return null;
+                      const Icon = entry.icon;
+                      return (
+                        <span
+                          key={id}
+                          title={entry.label}
+                          className="flex size-5 items-center justify-center rounded-md bg-solid-soft text-solid"
+                        >
+                          <Icon className="size-3" aria-hidden />
+                        </span>
+                      );
+                    })}
+                  </span>
+                ) : null}
+
+                <span
+                  className="flex max-w-28 items-center gap-1 truncate text-[10px] font-semibold text-ncc-muted sm:max-w-none"
+                  title={`Access: ${retentionLabel}`}
+                >
+                  <ClockIcon className="size-3 shrink-0" aria-hidden />
+                  <span className="truncate">{retentionLabel}</span>
+                </span>
+              </GlassPanel>
+            </div>
           ) : (
             <button
               type="button"
@@ -176,13 +192,9 @@ export default function MapChrome({
                 onClick={() => toggleCategory(category)}
                 aria-pressed={selected}
                 className={`flex cursor-pointer items-center gap-1.5 rounded-full px-2.5 py-1.5 transition ${
-                  selected
-                    ? 'bg-black/10'
-                    : 'hover:bg-black/[0.05]'
+                  selected ? 'bg-black/10' : 'hover:bg-black/[0.05]'
                 } ${
-                  filters.categories.length > 0 && !active
-                    ? 'opacity-45'
-                    : ''
+                  filters.categories.length > 0 && !active ? 'opacity-45' : ''
                 }`}
               >
                 <span

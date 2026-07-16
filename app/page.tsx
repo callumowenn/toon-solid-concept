@@ -1,6 +1,7 @@
 'use client';
 
 import CalendarWidget from '@/components/CalendarWidget';
+import CreateEventModal from '@/components/CreateEventModal';
 import ForYouPanel from '@/components/ForYouPanel';
 import GlassPanel from '@/components/GlassPanel';
 import MapChrome from '@/components/MapChrome';
@@ -12,6 +13,7 @@ import {
   defaultActivityFilters,
   defaultPersonalisation,
   selectMapListings,
+  type CityListing,
   type ListingCategory,
 } from '@/data/mockOurToon';
 import dynamic from 'next/dynamic';
@@ -37,6 +39,8 @@ export default function Home() {
   const [solidShare, setSolidShare] = useState<SolidShareResult | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [modalKey, setModalKey] = useState(0);
+  const [createEventOpen, setCreateEventOpen] = useState(false);
+  const [userListings, setUserListings] = useState<CityListing[]>([]);
   const [personalisation, setPersonalisation] = useState(
     defaultPersonalisation,
   );
@@ -64,8 +68,11 @@ export default function Home() {
   }
 
   const baseListings = useMemo(
-    () => selectMapListings(personalisation, solidConnected),
-    [personalisation, solidConnected],
+    () => [
+      ...selectMapListings(personalisation, solidConnected),
+      ...(solidConnected ? userListings : []),
+    ],
+    [personalisation, solidConnected, userListings],
   );
 
   const listings = useMemo(
@@ -110,6 +117,7 @@ export default function Home() {
         solidConnected={solidConnected}
         solidShare={solidShare}
         onConnectClick={openShareModal}
+        onCreateEventClick={() => setCreateEventOpen(true)}
         filters={filters}
         onFiltersChange={setFilters}
       />
@@ -195,12 +203,25 @@ export default function Home() {
           }));
           setActiveRouteListingId(null);
           setFocusListingId(null);
+          setUserListings([]);
+          setCreateEventOpen(false);
         }}
         onShare={(result) => {
           setModalOpen(false);
           setSolidShare(result);
           setSolidConnected(true);
           setPersonalisation(55);
+        }}
+      />
+
+      <CreateEventModal
+        open={createEventOpen}
+        onClose={() => setCreateEventOpen(false)}
+        onCreate={(result) => {
+          setUserListings((prev) => [result.listing, ...prev]);
+          setCreateEventOpen(false);
+          setPersonalisation(100);
+          setFocusListingId(result.listing.id);
         }}
       />
     </div>
